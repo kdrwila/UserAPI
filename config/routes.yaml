@@ -1,3 +1,33 @@
 #index:
 #    path: /
 #    controller: App\Controller\DefaultController::index
+
+app_sign_up:
+  path: /api/sign-up
+  controller: App\Controller\RegistrationController::register
+  methods: [POST]
+app_sign_in:
+  path: /api/sign-in
+  controller: App\Controller\LoginController::login
+  methods: [POST]
+app_sign_out:
+  path: /api/sign-out
+  controller: App\Controller\LoginController::logout
+app_me:
+  path: /api/me
+  controller: App\Controller\UserController::getMe
+app_users:
+  path: /api/users
+  controller: App\Controller\UserController::getUsers
+app_user:
+  path: /api/user/{id<\d+>}
+  controller: App\Controller\UserController::getUserById
+  methods: [GET]
+app_user_update:
+  path: /api/user/{id<\d+>}
+  controller: App\Controller\UserController::postUser
+  methods: [POST, PUT]
+app_user_delete:
+  path: /api/user/{id<\d+>}
+  controller: App\Controller\UserController::deleteUser
+  methods: [DELETE]
