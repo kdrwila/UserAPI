@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Form\UserType;
 use App\Entity\User;
+use App\HttpFoundation\ResponseAdapter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -21,7 +22,7 @@ class RegistrationController extends AbstractController
         // get json from request content and decode to assoc array
         $data = json_decode($request->getContent(), true);
 
-        if(!isset($data['name']) && !isset($data['email']) && !isset($data['password']))
+        if(!isset($data['name']) || !isset($data['email']) || !isset($data['password']))
         {
             $data = array(
                 'message' => 'No required parameteres found ( email, password, name ).'
@@ -64,7 +65,7 @@ class RegistrationController extends AbstractController
         {
             $data = array(
                 'message' => "Registration form isn't valid, please fix following errors:",
-                'errors' => (STRING)$form->getErrors()
+                'errors' => (STRING)$form->getErrors(true)
             );
     
             $adapter = new ResponseAdapter($data, Response::HTTP_BAD_REQUEST, array(), $responseType);

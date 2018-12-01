@@ -125,7 +125,7 @@ class UserController extends AbstractController
         // get json data from request content
         $data = json_decode($request->getContent(), true);
 
-        if(!isset($data['name']) && !isset($data['password']))
+        if(!isset($data['name']) || !isset($data['password']))
         {
             $data = array(
                 'message' => 'No required parameteres found ( password, name ).'
@@ -156,7 +156,7 @@ class UserController extends AbstractController
         {
             $data = array(
                 'message'   => "User update form isn't valid, please fix following errors:",
-                'errors'    => (STRING)$form->getErrors()
+                'errors'    => (STRING)$form->getErrors(true)
             );
     
             $adapter = new ResponseAdapter($data, Response::HTTP_BAD_REQUEST, array(), $responseType);
