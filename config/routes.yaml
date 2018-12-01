@@ -19,6 +19,9 @@ app_me:
 app_users:
   path: /api/users
   controller: App\Controller\UserController::getUsers
+app_users_search:
+  path: /api/users/{query<([\w\W]+/[\w\W]+)+>}
+  controller: App\Controller\UserController::getUsersByQuery
 app_user:
   path: /api/user/{id<\d+>}
   controller: App\Controller\UserController::getUserById

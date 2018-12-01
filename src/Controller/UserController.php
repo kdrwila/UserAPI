@@ -4,10 +4,11 @@ namespace App\Controller;
 use App\Form\UserUpdateType;
 use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+// use Symfony\Component\Cache\Adapter\MemcachedAdapter;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\Routing\Annotation\Route;
 use Doctrine\ORM\EntityManagerInterface;
 // use Symfony\Component\Serializer\Serializer;
 // use Symfony\Component\Serializer\Encoder\XmlEncoder;
@@ -21,8 +22,8 @@ class UserController extends AbstractController
      */
     public function getMe()
     {
-        $user = $this->getUser();
-        $assocUser = $user->toAssocPublic();
+        $user       = $this->getUser();
+        $assocUser  = $user->toAssocPublic();
 
         // not sure if we want to show all the data about user
         // $encoders = array(new XmlEncoder(), new JsonEncoder());
@@ -40,8 +41,47 @@ class UserController extends AbstractController
      */
     public function getUsers()
     {
-        $em = $this->getDoctrine()->getEntityManager();
-        $users = $em->getRepository(User::class)->findAll();
+        // can't test it on windows
+        // $client = MemcachedAdapter::createConnection('memcached://localhost');
+        // $cache  = new MemcachedAdapter($client, 'uapi_', 0);
+        // $item   = $cache->getItem('usersList');
+        // $users  = array();
+
+        // if(!$item->isHit())
+        // {
+        //     $em     = $this->getDoctrine()->getEntityManager();
+        //     $users  = $em->getRepository(User::class)->findAll();
+
+        //     $item
+        //         ->set($users)
+        //         ->expiresAfter(10);
+        //     $cache->save($item);
+        // }
+        // else
+        // {
+        //     $users = $item->get();
+        // }
+
+        $em     = $this->getDoctrine()->getEntityManager();
+        $users  = $em->getRepository(User::class)->findAll();
+
+        $assocUsers = array();
+        foreach($users as $u)
+        {
+            $assocUsers[] = $u->toAssocPublic();
+        }
+
+        return new JsonResponse($assocUsers, Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/api/users", name="app_users")
+     */
+    public function getUsersByQuery(string $query)
+    {
+        $em     = $this->getDoctrine()->getEntityManager();
+        $users  = $em->getRepository(User::class)
+            ->loadUsersByQuery($query);
 
         $assocUsers = array();
         foreach($users as $u)
@@ -107,8 +147,8 @@ class UserController extends AbstractController
         else
         {
             $data = array(
-                'message' => "User update form isn't valid, please fix following errors:",
-                'errors' => (STRING)$form->getErrors()
+                'message'   => "User update form isn't valid, please fix following errors:",
+                'errors'    => (STRING)$form->getErrors()
             );
     
             return new JsonResponse($data, Response::HTTP_BAD_REQUEST);
