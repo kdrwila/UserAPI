@@ -3,6 +3,7 @@ namespace App\Controller;
 
 use App\Form\UserUpdateType;
 use App\Entity\User;
+use App\HttpFoundation\ResponseAdapter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 // use Symfony\Component\Cache\Adapter\MemcachedAdapter;
 use Symfony\Component\Routing\Annotation\Route;
@@ -20,10 +21,10 @@ class UserController extends AbstractController
     /**
      * @Route("/api/me", name="app_me")
      */
-    public function getMe()
+    public function getMe(string $responseType)
     {
         $user       = $this->getUser();
-        $assocUser  = $user->toAssocPublic();
+        $assocUser  = $user->toAssocPublic(true);
 
         // not sure if we want to show all the data about user
         // $encoders = array(new XmlEncoder(), new JsonEncoder());
@@ -33,13 +34,14 @@ class UserController extends AbstractController
 
         // $assocUser = json_decode($serializer->serialize($user, 'json'), true);
 
-        return new JsonResponse($assocUser, Response::HTTP_OK);
+        $adapter = new ResponseAdapter($assocUser, Response::HTTP_OK, array(), $responseType);
+        return $adapter->returnResponse();
     }
 
     /**
      * @Route("/api/users", name="app_users")
      */
-    public function getUsers()
+    public function getUsers(string $responseType)
     {
         // can't test it on windows
         // $client = MemcachedAdapter::createConnection('memcached://localhost');
@@ -65,47 +67,50 @@ class UserController extends AbstractController
         $em     = $this->getDoctrine()->getEntityManager();
         $users  = $em->getRepository(User::class)->findAll();
 
-        $assocUsers = array();
+        $assocUsers = array('users' => array());
         foreach($users as $u)
         {
-            $assocUsers[] = $u->toAssocPublic();
+            $assocUsers['users'][] = $u->toAssocPublic();
         }
 
-        return new JsonResponse($assocUsers, Response::HTTP_OK);
+        $adapter = new ResponseAdapter($assocUsers, Response::HTTP_OK, array(), $responseType);
+        return $adapter->returnResponse();
     }
 
     /**
      * @Route("/api/users", name="app_users")
      */
-    public function getUsersByQuery(string $query)
+    public function getUsersByQuery(string $query, string $responseType)
     {
         $em     = $this->getDoctrine()->getEntityManager();
         $users  = $em->getRepository(User::class)
             ->loadUsersByQuery($query);
 
-        $assocUsers = array();
+        $assocUsers = array('users' => array());
         foreach($users as $u)
         {
-            $assocUsers[] = $u->toAssocPublic();
+            $assocUsers['users'][] = $u->toAssocPublic();
         }
 
-        return new JsonResponse($assocUsers, Response::HTTP_OK);
+        $adapter = new ResponseAdapter($assocUsers, Response::HTTP_OK, array(), $responseType);
+        return $adapter->returnResponse();
     }
 
     /**
      * @Route("/api/user/{id<\d+>}", name="app_user", methods={"GET"})
      */
-    public function getUserById(User $user)
+    public function getUserById(User $user, string $responseType)
     {
-        $assocUser = $user->toAssocPublic();
+        $assocUser = $user->toAssocPublic(true);
 
-        return new JsonResponse($assocUser, Response::HTTP_OK);
+        $adapter = new ResponseAdapter($assocUser, Response::HTTP_OK, array(), $responseType);
+        return $adapter->returnResponse();
     }
 
     /**
      * @Route("/api/user/{id<\d+>}", name="app_user_update", methods={"POST", "PUT"})
      */
-    public function postUser(User $user, Request $request)
+    public function postUser(User $user, string $responseType, Request $request)
     {
         if($this->getUser() != $user)
         {
@@ -113,7 +118,8 @@ class UserController extends AbstractController
                 'message' => "Specified user account doesn't belong to you."
             );
     
-            return new JsonResponse($data, Response::HTTP_FORBIDDEN);
+            $adapter = new ResponseAdapter($data, Response::HTTP_FORBIDDEN, array(), $responseType);
+            return $adapter->returnResponse();
         }
  
         // get json data from request content
@@ -125,7 +131,8 @@ class UserController extends AbstractController
                 'message' => 'No required parameteres found ( password, name ).'
             );
     
-            return new JsonResponse($data, Response::HTTP_BAD_REQUEST);
+            $adapter = new ResponseAdapter($data, Response::HTTP_BAD_REQUEST, array(), $responseType);
+            return $adapter->returnResponse();
         }
         
         // build update form
@@ -139,10 +146,11 @@ class UserController extends AbstractController
             $entityManager->flush();
 
             $data = array(
-                'message' => "User account data with id: $id was updated"
+                'message' => "User account data with id: $user->id was updated"
             );
     
-            return new JsonResponse($data, Response::HTTP_OK);
+            $adapter = new ResponseAdapter($data, Response::HTTP_OK, array(), $responseType);
+            return $adapter->returnResponse();
         }
         else
         {
@@ -151,14 +159,15 @@ class UserController extends AbstractController
                 'errors'    => (STRING)$form->getErrors()
             );
     
-            return new JsonResponse($data, Response::HTTP_BAD_REQUEST);
+            $adapter = new ResponseAdapter($data, Response::HTTP_BAD_REQUEST, array(), $responseType);
+            return $adapter->returnResponse();
         }
     }
 
     /**
      * @Route("/api/user/{id<\d+>}", name="app_user_delete", methods={"DELETE"})
      */
-    public function deleteUser(User $user)
+    public function deleteUser(User $user, string $responseType)
     {
         if($this->getUser() == $user)
         {
@@ -166,7 +175,8 @@ class UserController extends AbstractController
                 'message' => "You can't delete your user account."
             );
     
-            return new JsonResponse($data, Response::HTTP_FORBIDDEN);
+            $adapter = new ResponseAdapter($data, Response::HTTP_BAD_REQUEST, array(), $responseType);
+            return $adapter->returnResponse();
         }
 
         $em = $this->getDoctrine()->getEntityManager();
@@ -174,10 +184,11 @@ class UserController extends AbstractController
         $em->flush();
 
         $data = array(
-            'message' => "User account with id: $id was removed."
+            'message' => "User account with id: $user->id was removed."
         );
 
-        return new JsonResponse($data, Response::HTTP_OK);
+        $adapter = new ResponseAdapter($data, Response::HTTP_OK, array(), $responseType);
+        return $adapter->returnResponse();
     }
 }
 

@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Entity\User;
+use App\HttpFoundation\ResponseAdapter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -70,11 +71,14 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
+        $responseType = $request->attributes->get('_route_params')['responseType'];
+
         $data = array(
             'message' => strtr($exception->getMessageKey(), $exception->getMessageData())
         );
 
-        return new JsonResponse($data, Response::HTTP_FORBIDDEN);
+        $adapter = new ResponseAdapter($data, Response::HTTP_FORBIDDEN, array(), $responseType);
+        return $adapter->returnResponse();
     }
 
     /**
@@ -82,12 +86,15 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
      */
     public function start(Request $request, AuthenticationException $authException = null)
     {
+        $responseType = $request->attributes->get('_route_params')['responseType'];
+
         $data = array(
             // you might translate this message
             'message' => 'Authentication Required. Create new account (/api/sign-up) or login (/api/sign-in)'
         );
 
-        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
+        $adapter = new ResponseAdapter($data, Response::HTTP_UNAUTHORIZED, array(), $responseType);
+        return $adapter->returnResponse();
     }
 
     public function supportsRememberMe()

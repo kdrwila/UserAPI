@@ -16,7 +16,7 @@ class RegistrationController extends AbstractController
     /**
      * @Route("/sign-up", name="app_sign_up", methods={"POST"})
      */
-    public function register(Request $request)
+    public function register(string $responseType, Request $request)
     {
         // get json from request content and decode to assoc array
         $data = json_decode($request->getContent(), true);
@@ -27,7 +27,8 @@ class RegistrationController extends AbstractController
                 'message' => 'No required parameteres found ( email, password, name ).'
             );
     
-            return new JsonResponse($data, Response::HTTP_BAD_REQUEST);
+            $adapter = new ResponseAdapter($data, Response::HTTP_BAD_REQUEST, array(), $responseType);
+            return $adapter->returnResponse();
         }
 
         // Build user registration form
@@ -56,7 +57,8 @@ class RegistrationController extends AbstractController
                 'apiToken'  => $apiToken
             );
     
-            return new JsonResponse($data, Response::HTTP_CREATED);
+            $adapter = new ResponseAdapter($data, Response::HTTP_CREATED, array(), $responseType);
+            return $adapter->returnResponse();
         } 
         else
         {
@@ -65,7 +67,8 @@ class RegistrationController extends AbstractController
                 'errors' => (STRING)$form->getErrors()
             );
     
-            return new JsonResponse($data, Response::HTTP_BAD_REQUEST);
+            $adapter = new ResponseAdapter($data, Response::HTTP_BAD_REQUEST, array(), $responseType);
+            return $adapter->returnResponse();
         }
     }
 }

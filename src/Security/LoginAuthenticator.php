@@ -3,6 +3,7 @@
 namespace App\Security;
 
 use App\Entity\User;
+use App\HttpFoundation\ResponseAdapter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -68,6 +69,7 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
     {
         $apiToken = $this->user->generateNewAPIToken();
+        $responseType = $request->attributes->get('_route_params')['responseType'];
 
         $data = array(
             'message'   => "You are successfully logged in. Your new API token in case if automatic authentication doesn't work is: $apiToken.",
@@ -75,16 +77,20 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
             'apiToken'  => $apiToken
         );
 
-        return new JsonResponse($data, Response::HTTP_OK);
+        $adapter = new ResponseAdapter($data, Response::HTTP_OK, array(), $responseType);
+        return $adapter->returnResponse();
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
+        $responseType = $request->attributes->get('_route_params')->get('responseType');
+
         $data = array(
             'message' => strtr($exception->getMessageKey(), $exception->getMessageData())
         );
 
-        return new JsonResponse($data, Response::HTTP_FORBIDDEN);
+        $adapter = new ResponseAdapter($data, Response::HTTP_FORBIDDEN, array(), $responseType);
+        return $adapter->returnResponse();
     }
 
     /**
@@ -92,11 +98,14 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
      */
     public function start(Request $request, AuthenticationException $authException = null)
     {
+        $responseType = $request->attributes->get('_route_params')->get('responseType');
+
         $data = array(
             'message' => 'Authentication Required. Create new account (/api/sign-up) or login (/api/sign-in)'
         );
 
-        return new JsonResponse($data, Response::HTTP_UNAUTHORIZED);
+        $adapter = new ResponseAdapter($data, Response::HTTP_UNAUTHORIZED, array(), $responseType);
+        return $adapter->returnResponse();
     }
 
     public function supportsRememberMe()

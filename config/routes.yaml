@@ -3,34 +3,52 @@
 #    controller: App\Controller\DefaultController::index
 
 app_sign_up:
-  path: /api/sign-up
+  path: /api/sign-up/{responseType}
   controller: App\Controller\RegistrationController::register
   methods: [POST]
+  defaults:
+    responseType: json
 app_sign_in:
-  path: /api/sign-in
+  path: /api/sign-in/{responseType}
   controller: App\Controller\LoginController::login
   methods: [POST]
+  defaults:
+    responseType: json
 app_sign_out:
-  path: /api/sign-out
+  path: /api/sign-out/{responseType}
   controller: App\Controller\LoginController::logout
+  defaults:
+    responseType: json
 app_me:
-  path: /api/me
+  path: /api/me/{responseType}
   controller: App\Controller\UserController::getMe
-app_users:
-  path: /api/users
-  controller: App\Controller\UserController::getUsers
-app_users_search:
-  path: /api/users/{query<([\w\W]+/[\w\W]+)+>}
-  controller: App\Controller\UserController::getUsersByQuery
+  defaults:
+    responseType: json
 app_user:
-  path: /api/user/{id<\d+>}
+  path: /api/users/{id<\d+>}/{responseType}
   controller: App\Controller\UserController::getUserById
   methods: [GET]
+  defaults:
+    responseType: json
 app_user_update:
-  path: /api/user/{id<\d+>}
+  path: /api/users/{id<\d+>}/{responseType}
   controller: App\Controller\UserController::postUser
   methods: [POST, PUT]
+  defaults:
+    responseType: json
 app_user_delete:
-  path: /api/user/{id<\d+>}
+  path: /api/users/{id<\d+>}/{responseType}
   controller: App\Controller\UserController::deleteUser
   methods: [DELETE]
+  defaults:
+    responseType: json
+app_users:
+  path: /api/users/{responseType}
+  controller: App\Controller\UserController::getUsers
+  defaults:
+    responseType: json
+app_users_search:
+  path: /api/users/{query<([\w\W]+/[\w\W]+)+>}/{responseType}
+  controller: App\Controller\UserController::getUsersByQuery
+  defaults:
+    responseType: json

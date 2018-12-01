@@ -149,13 +149,20 @@ class User implements UserInterface
         // $this->plainPassword = null;
     }
 
-    public function toAssocPublic(): array
+    public function toAssocPublic(bool $wrap = false): array
     {
-        return array(
-            'id' => $this->id,
-            'name' => $this->name,
+        $output = array(
+            'id'    => $this->id,
+            'name'  => $this->name,
             'email' => $this->email
         );
+
+        if($wrap)
+        {
+            $output = array('user' => $output);
+        }
+
+        return $output;
     }
 
     public function generateNewAPIToken(): string
