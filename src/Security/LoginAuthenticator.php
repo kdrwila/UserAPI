@@ -70,7 +70,9 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
         $apiToken = $this->user->generateNewAPIToken();
 
         $data = array(
-            'message' => "You are successfully logged in. Your new API token in case if automatic authentication doesn't work is: $apiToken."
+            'message'   => "You are successfully logged in. Your new API token in case if automatic authentication doesn't work is: $apiToken.",
+            'id'        => $this->user->getId(),
+            'apiToken'  => $apiToken
         );
 
         return new JsonResponse($data, Response::HTTP_OK);

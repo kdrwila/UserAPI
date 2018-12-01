@@ -51,10 +51,12 @@ class RegistrationController extends AbstractController
             $this->get('session')->set('_security_api_logged', serialize($token));
 
             $data = array(
-                'message' => "Registration was successful, you API key is: $apiToken, in case if automatic authorization doesn't work set as 'X-AUTH-TOKEN' in header."
+                'message'   => "Registration was successful, you API key is: $apiToken, in case if automatic authorization doesn't work set as 'X-AUTH-TOKEN' in header.",
+                'id'        => $user->getId(),
+                'apiToken'  => $apiToken
             );
     
-            return new JsonResponse($data, Response::HTTP_OK);
+            return new JsonResponse($data, Response::HTTP_CREATED);
         } 
         else
         {

@@ -113,7 +113,7 @@ class UserController extends AbstractController
                 'message' => "Specified user account doesn't belong to you."
             );
     
-            return new JsonResponse($data, Response::HTTP_BAD_REQUEST);
+            return new JsonResponse($data, Response::HTTP_FORBIDDEN);
         }
  
         // get json data from request content
@@ -166,7 +166,7 @@ class UserController extends AbstractController
                 'message' => "You can't delete your user account."
             );
     
-            return new JsonResponse($data, Response::HTTP_BAD_REQUEST);
+            return new JsonResponse($data, Response::HTTP_FORBIDDEN);
         }
 
         $em = $this->getDoctrine()->getEntityManager();
