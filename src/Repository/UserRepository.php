@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Symfony\Bridge\Doctrine\RegistryInterface;
+use Symfony\Component\Cache\Adapter\MemcachedAdapter;
 
 /**
  * @method User|null find($id, $lockMode = null, $lockVersion = null)
@@ -23,6 +24,7 @@ class UserRepository extends ServiceEntityRepository
     {
         $validQueryKeys = array('email', 'name');
 
+        // get only vaild query keys.
         $searchBy = array();
         $data = explode('/', $query);
         for($i = 0; $i < count($data); $i += 2)
@@ -33,22 +35,46 @@ class UserRepository extends ServiceEntityRepository
             }
         }
 
-        $queryString = '';
-        foreach($searchBy as $key => $value)
+        // try recover data from memcached.
+        $client = MemcachedAdapter::createConnection('memcached://localhost');
+        $cache  = new MemcachedAdapter($client, 'uapi_', 0);
+
+        // build cache identifier.
+        $item   = $cache->getItem('usersList_'. 
+            ($searchBy['email'] ?? '') .'_'.
+            ($searchBy['name'] ?? ''));
+        $users  = array();
+
+        // cache item not found.
+        if(!$item->isHit())
         {
-            $queryString .= "u.$key LIKE :$key AND ";
+            // build query string.
+            $queryString = '';
+            foreach($searchBy as $key => $value)
+            {
+                $queryString .= "u.$key LIKE :$key AND ";
+            }
+            $queryString = substr($queryString, 0, -5);
+
+            // build query
+            $queryBuilder = $this->createQueryBuilder('u')
+                ->where($queryString);
+
+            foreach($searchBy as $key => $value)
+            {
+                $queryBuilder = $queryBuilder->setParameter($key, "%$value%");
+            }
+
+            // get all results.
+            $users = $queryBuilder->getQuery()
+                ->getResult();
+
+            // save to cache for 10 seconds.
+            $item->set($users)->expiresAfter(10);
+            $cache->save($item);
         }
-        $queryString = substr($queryString, 0, -5);
+        else $users = $item->get();
 
-        $queryBuilder = $this->createQueryBuilder('u')
-            ->where($queryString);
-
-        foreach($searchBy as $key => $value)
-        {
-            $queryBuilder = $queryBuilder->setParameter($key, "%$value%");
-        }
-
-        return $queryBuilder->getQuery()
-            ->getResult();
+        return $users;
     }
 }

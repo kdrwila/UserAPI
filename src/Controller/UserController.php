@@ -5,7 +5,7 @@ use App\Form\UserUpdateType;
 use App\Entity\User;
 use App\HttpFoundation\ResponseAdapter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-// use Symfony\Component\Cache\Adapter\MemcachedAdapter;
+use Symfony\Component\Cache\Adapter\MemcachedAdapter;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -43,29 +43,20 @@ class UserController extends AbstractController
      */
     public function getUsers(string $responseType)
     {
-        // can't test it on windows
-        // $client = MemcachedAdapter::createConnection('memcached://localhost');
-        // $cache  = new MemcachedAdapter($client, 'uapi_', 0);
-        // $item   = $cache->getItem('usersList');
-        // $users  = array();
+        $client = MemcachedAdapter::createConnection('memcached://localhost');
+        $cache  = new MemcachedAdapter($client, 'uapi_', 0);
+        $item   = $cache->getItem('usersList');
+        $users  = array();
 
-        // if(!$item->isHit())
-        // {
-        //     $em     = $this->getDoctrine()->getEntityManager();
-        //     $users  = $em->getRepository(User::class)->findAll();
+        if(!$item->isHit())
+        {
+            $em     = $this->getDoctrine()->getEntityManager();
+            $users  = $em->getRepository(User::class)->findAll();
 
-        //     $item
-        //         ->set($users)
-        //         ->expiresAfter(10);
-        //     $cache->save($item);
-        // }
-        // else
-        // {
-        //     $users = $item->get();
-        // }
-
-        $em     = $this->getDoctrine()->getEntityManager();
-        $users  = $em->getRepository(User::class)->findAll();
+            $item->set($users)->expiresAfter(10);
+            $cache->save($item);
+        }
+        else $users = $item->get();
 
         $assocUsers = array('users' => array());
         foreach($users as $u)
@@ -101,8 +92,20 @@ class UserController extends AbstractController
      */
     public function getUserById(User $user, string $responseType)
     {
-        $assocUser = $user->toAssocPublic(true);
+		$client 	= MemcachedAdapter::createConnection('memcached://localhost');
+        $cache  	= new MemcachedAdapter($client, 'uapi_', 0);
+        $item   	= $cache->getItem('usersList_id_'. $user->getId());
+        $assocUser  = array();
 
+        if(!$item->isHit())
+        {
+            $assocUser = $user->toAssocPublic(true);
+
+            $item->set($assocUser)->expiresAfter(10);
+            $cache->save($item);
+        }
+		else $assocUser = $item->get();
+		
         $adapter = new ResponseAdapter($assocUser, Response::HTTP_OK, array(), $responseType);
         return $adapter->returnResponse();
     }
@@ -146,7 +149,7 @@ class UserController extends AbstractController
             $entityManager->flush();
 
             $data = array(
-                'message' => "User account data with id: $user->id was updated"
+                'message' => "User account data with id: ". $user->getId() ." was updated"
             );
     
             $adapter = new ResponseAdapter($data, Response::HTTP_OK, array(), $responseType);
@@ -179,12 +182,13 @@ class UserController extends AbstractController
             return $adapter->returnResponse();
         }
 
+		$id = $user->getId();
         $em = $this->getDoctrine()->getEntityManager();
         $em->remove($user);
         $em->flush();
 
         $data = array(
-            'message' => "User account with id: $user->id was removed."
+            'message' => "User account with id: $id was removed."
         );
 
         $adapter = new ResponseAdapter($data, Response::HTTP_OK, array(), $responseType);
