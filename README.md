@@ -2,7 +2,7 @@
 
 # Requirements:
 - composer
-- php >= 7.1.3
+- php >= 7.1.3 with xml, dom, zip, mbstring, memcached, sqlite extensions
 
 # Instalation:
 - clone repository or download zip archive and extract it.
