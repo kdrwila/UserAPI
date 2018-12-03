@@ -1,8 +1,8 @@
 # UserAPI
 
 # Requirements:
-- php >= 7.1.3 with xml, dom, zip, mbstring, memcached, sqlite, curl extensions
-- memcached >= 2.2.0
+- php >= 7.1.3 w/ xml, dom, zip, mbstring, memcached, sqlite, curl extensions
+- memcached server ( not really required, API will work without it, but results won't be cached )
 - composer
 
 # Instalation:
@@ -20,7 +20,7 @@
 | --- | --- | --- | --- | --- |
 | `/api/sign-up` | POST | `email(string)`<br/> `password(string)`<br/> `name(string)` | `message(string)`<br/> `id(int)`<br/> `apiToken(string)`  | Used to register new user, in return user gets unique API token and own ID | 
 | `/api/sign-in` | POST | `email(string)`<br/> `password(string)` | `message(string)`<br/> `id(int)`<br/> `apiToken(string)`  | Used to sign in, in return user gets new unique API token and own ID |
-| `/api/sign-out` | GET | *none* | *none*  | Used to sign out, redirects to `/` |
+| `/api/sign-out` | GET | *none* | `message(string)`  | Used to sign out, redirects to `/signed-out` |
 | `/api/me` | GET | *none* | `id(int)`<br/> `name(string)`<br/> `email(string)`  | Informations about current authenticated user |
 | `/api/users` | GET | *none* | `users(array)` {<br/> `id(int)`<br/> `name(string)`<br/> `email(string)`<br/> } | List of all users |
 | `/api/users/[var/value]*` | GET | *none* | `users(array)` {<br/> `id(int)`<br/> `name(string)`<br/> `email(string)`<br/> } | Searching users, available query keys: email, name. Order is not important i.e. `/api/users/name/john/`, `/api/users/email/gmail/name/john/` |
@@ -40,3 +40,7 @@ There are two types of authentication:
 
 - JSON - default return type, use default endpoints or add `/json` at end i.e. `/api/users`, `/api/users/json`
 - XML - add `/xml` at end of each endpoint i.e. `/api/sign-up/xml`, `/api/users/xml/`
+
+# Functional Tests
+
+To run functional tests run `./bin/phpunit` command.
