@@ -1,5 +1,7 @@
 # UserAPI
 
+Basic User API created with Symfony 4.1.8 framework.
+
 # Requirements:
 - php >= 7.1.3 w/ xml, dom, zip, mbstring, memcached, sqlite, curl extensions
 - memcached server ( not really required, API will work without it, but results won't be cached )
