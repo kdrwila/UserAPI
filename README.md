@@ -7,12 +7,12 @@ Basic User API created with Symfony 4.1.8 framework.
 - memcached server ( not really required, API will work without it, but results won't be cached )
 - composer
 
-# Instalation:
+# Installation:
 - clone repository or download zip archive and extract it.
 - run `composer install` or if you have composer installed locally `php composer.phar install` to install all dependencies.
 - run `php bin/console doctrine:migrations:migrate` to create empty database.
 
-# Runing the server:
+# Running the server:
 - run `php bin/console server:run`
 - by default api should be available at http://127.0.0.1:8000, if port 8000 is taken, it will try bind nextones i.e. http://127.0.0.1:8001, http://127.0.0.1:8002
 
