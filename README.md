@@ -12,7 +12,7 @@
 
 # Runing the server:
 - run `php bin/console server:run`
-- by default api sould be available at http://127.0.0.1:8000
+- by default api should be available at http://127.0.0.1:8000, if port 8000 is taken, it will try bind nextones i.e. http://127.0.0.1:8001, http://127.0.0.1:8002
 
 # Endpoints
 
