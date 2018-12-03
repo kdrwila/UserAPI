@@ -40,17 +40,26 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
      */
     public function getCredentials(Request $request)
     {
-        $data = json_decode($request->getContent(), true);
+        $data       = json_decode($request->getContent(), true);
+
+        $email      = $data['email'] ?? '';
+        $password   = $data['password'] ?? '';
 
         return array(
-            'email' => $data['email'],
-            'password' => $data['password']
+            'email'     => $email,
+            'password'  => $password
         );
     }
 
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
         // if a User object, checkCredentials() is called
+
+        if(empty($credentials['email']) || empty($credentials['password']))
+        {
+            throw new AuthenticationException('There are some missing parameters ( expected password and email )');
+        }
+
         return $this->em->getRepository(User::class)
             ->findOneBy(['email' => $credentials['email']]);
     }
@@ -63,7 +72,9 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
             return true;
         }
         else
-            return false;
+        {
+            throw new AuthenticationException('Password is incorrect.');
+        }
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, $providerKey)
@@ -86,7 +97,7 @@ class LoginAuthenticator extends AbstractGuardAuthenticator
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
     {
-        $responseType = $request->attributes->get('_route_params')->get('responseType');
+        $responseType = $request->attributes->get('_route_params')['responseType'];
 
         $data = array(
             'message' => strtr($exception->getMessageKey(), $exception->getMessageData())

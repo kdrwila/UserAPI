@@ -19,9 +19,13 @@ app_sign_out:
   controller: App\Controller\LoginController::logout
   defaults:
     responseType: json
+app_signed_out:
+  path: /signed-out
+  controller: App\Controller\LoginController::loggedout
 app_me:
   path: /api/me/{responseType}
   controller: App\Controller\UserController::getMe
+  methods: [GET]
   defaults:
     responseType: json
 app_user:
@@ -33,7 +37,7 @@ app_user:
 app_user_update:
   path: /api/users/{id<\d+>}/{responseType}
   controller: App\Controller\UserController::postUser
-  methods: [POST, PUT]
+  methods: [POST, PATCH]
   defaults:
     responseType: json
 app_user_delete:
@@ -45,10 +49,12 @@ app_user_delete:
 app_users:
   path: /api/users/{responseType}
   controller: App\Controller\UserController::getUsers
+  methods: [GET]
   defaults:
     responseType: json
 app_users_search:
   path: /api/users/{query<([\w\W]+/[\w\W]+)+>}/{responseType}
   controller: App\Controller\UserController::getUsersByQuery
+  methods: [GET]
   defaults:
     responseType: json

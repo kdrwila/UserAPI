@@ -26,7 +26,7 @@ security:
                 entry_point: App\Security\TokenAuthenticator
             logout:
                 path: app_sign_out
-                target: /
+                target: /signed-out
                 invalidate_session: true
 
     access_control:

@@ -50,7 +50,7 @@ class UserController extends AbstractController
 
         if(!$item->isHit())
         {
-            $em     = $this->getDoctrine()->getEntityManager();
+            $em     = $this->getDoctrine()->getManager();
             $users  = $em->getRepository(User::class)->findAll();
 
             $item->set($users)->expiresAfter(10);
@@ -73,7 +73,7 @@ class UserController extends AbstractController
      */
     public function getUsersByQuery(string $query, string $responseType)
     {
-        $em     = $this->getDoctrine()->getEntityManager();
+        $em     = $this->getDoctrine()->getManager();
         $users  = $em->getRepository(User::class)
             ->loadUsersByQuery($query);
 
@@ -183,7 +183,7 @@ class UserController extends AbstractController
         }
 
 		$id = $user->getId();
-        $em = $this->getDoctrine()->getEntityManager();
+        $em = $this->getDoctrine()->getManager();
         $em->remove($user);
         $em->flush();
 
