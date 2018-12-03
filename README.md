@@ -27,7 +27,7 @@ Basic User API created with Symfony 4.1.8 framework.
 | `/api/users` | GET | *none* | `users(array)` {<br/> `id(int)`<br/> `name(string)`<br/> `email(string)`<br/> } | List of all users |
 | `/api/users/[var/value]*` | GET | *none* | `users(array)` {<br/> `id(int)`<br/> `name(string)`<br/> `email(string)`<br/> } | Searching users, available query keys: email, name. Order is not important i.e. `/api/users/name/john/`, `/api/users/email/gmail/name/john/` |
 | `/api/users/[id]` | GET | *none* | `id(int)`<br/> `name(string)`<br/> `email(string)` | Information about user with provided ID |
-| `/api/users/[id]` | POST, PUT | `password(string)`<br/> `name(string)` | `message(string)` | Used to update user password and name, user can only update own data |
+| `/api/users/[id]` | POST, PATCH | `password(string)`<br/> `name(string)` | `message(string)` | Used to update user password and name, user can only update own data |
 | `/api/users/[id]` | DELETE | *none* | `message(string)` | Used to delete users, user can delete all accounts beside own |
 
 * All requests fields should be sent in JSON
